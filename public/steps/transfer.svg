@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="240" viewBox="0 4 360 240" fill="none">
+<defs>
+<linearGradient id="gSoft" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#d2e8ff" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#4c8bff" stop-opacity="0.55"/>
+</linearGradient>
+<linearGradient id="gCyl" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#d2e8ff" stop-opacity="0.95"/>
+<stop offset="0.55" stop-color="#aed3ff" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#7eb6ff" stop-opacity="0.85"/>
+</linearGradient>
+<linearGradient id="gPie" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#7eb6ff"/>
+<stop offset="1" stop-color="#2361ff"/>
+</linearGradient>
+<radialGradient id="gFade" cx="180" cy="120" r="240" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#fff" stop-opacity="1"/>
+<stop offset="0.55" stop-color="#fff" stop-opacity="0.6"/>
+<stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</radialGradient>
+<mask id="mFade" maskUnits="userSpaceOnUse" x="0" y="0" width="360" height="240">
+<rect width="360" height="240" fill="url(#gFade)"/>
+</mask>
+<filter id="grain" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+<feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.0 0 0 0 -0.43" result="dk"/>
+<feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -1.0 0 0 0 0.64" result="lt"/>
+<feComposite in="dk" in2="SourceAlpha" operator="in" result="dkc"/>
+<feComposite in="lt" in2="SourceAlpha" operator="in" result="ltc"/>
+<feMerge>
+<feMergeNode in="SourceGraphic"/>
+<feMergeNode in="dkc"/>
+<feMergeNode in="ltc"/>
+</feMerge>
+</filter>
+</defs>
+<g opacity="1.0">
+<polygon points="78.0,120.2 140.0,156.0 78.0,191.8 16.0,156.0" fill="#ffffff" fill-opacity="0.72" stroke="#0b1b4d" stroke-opacity="0.55" stroke-width="1.4" stroke-linejoin="round"/>
+<line x1="58.2" y1="144.5" x2="92.9" y2="164.6" stroke="#0b1b4d" stroke-opacity="0.55" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="45.8" y1="151.7" x2="64.4" y2="162.4" stroke="#0b1b4d" stroke-opacity="0.4" stroke-width="1.4" stroke-linecap="round"/>
+<circle cx="111.5" cy="161.0" r="3.0" fill="none" stroke="#0b1b4d" stroke-opacity="0.55" stroke-width="1.2"/>
+</g>
+<g opacity="1.0">
+<polygon points="285.0,53.4 345.0,88.0 285.0,122.6 225.0,88.0" fill="#ffffff" fill-opacity="0.72" stroke="#0b1b4d" stroke-opacity="0.55" stroke-width="1.4" stroke-linejoin="round"/>
+</g>
+<ellipse cx="285" cy="96" rx="20" ry="9" fill="#0b1b4d" fill-opacity="0.14"/>
+<circle cx="285" cy="76" r="18" fill="#082897"/>
+<polyline points="277,76 283,82 294,69" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<g opacity="1.0">
+<path d="M146,146 C176,172 176,108 212,94" fill="none" stroke="#0a2fd9" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="0.1 9"/>
+<circle cx="146" cy="146" r="5" fill="#ffffff" stroke="#0a2fd9" stroke-width="2"/>
+<polygon points="215.7,92.6 202.5,107.1 196.1,90.7" fill="#0a2fd9" stroke="#0a2fd9" stroke-width="1.5" stroke-linejoin="round"/>
+</g>
+</svg>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="240" viewBox="30 20 300 200" fill="none">
+<defs>
+<linearGradient id="gSoft" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#d2e8ff" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#4c8bff" stop-opacity="0.55"/>
+</linearGradient>
+<linearGradient id="gCyl" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#d2e8ff" stop-opacity="0.95"/>
+<stop offset="0.55" stop-color="#aed3ff" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#7eb6ff" stop-opacity="0.85"/>
+</linearGradient>
+<linearGradient id="gPie" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#7eb6ff"/>
+<stop offset="1" stop-color="#2361ff"/>
+</linearGradient>
+<radialGradient id="gFade" cx="180" cy="120" r="240" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#fff" stop-opacity="1"/>
+<stop offset="0.55" stop-color="#fff" stop-opacity="0.6"/>
+<stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</radialGradient>
+<mask id="mFade" maskUnits="userSpaceOnUse" x="0" y="0" width="360" height="240">
+<rect width="360" height="240" fill="url(#gFade)"/>
+</mask>
+<filter id="grain" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+<feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.0 0 0 0 -0.43" result="dk"/>
+<feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -1.0 0 0 0 0.64" result="lt"/>
+<feComposite in="dk" in2="SourceAlpha" operator="in" result="dkc"/>
+<feComposite in="lt" in2="SourceAlpha" operator="in" result="ltc"/>
+<feMerge>
+<feMergeNode in="SourceGraphic"/>
+<feMergeNode in="dkc"/>
+<feMergeNode in="ltc"/>
+</feMerge>
+</filter>
+</defs>
+<g opacity="1.0">
+<g filter="url(#grain)"><polygon points="180.0,75.4 285.0,136.0 180.0,196.6 75.0,136.0" fill="url(#gSoft)" stroke="#4c8bff" stroke-opacity="0.6" stroke-width="1.2" stroke-linejoin="round"/></g>
+<polygon points="180.0,60.4 285.0,121.0 180.0,181.6 75.0,121.0" fill="#d2e8ff" fill-opacity="0.25" stroke="#7eb6ff" stroke-opacity="0.7" stroke-width="1.1" stroke-linejoin="round"/>
+<g opacity="1.0">
+<polygon points="180.0,45.4 285.0,106.0 180.0,166.6 75.0,106.0" fill="#ffffff" fill-opacity="0.72" stroke="#0b1b4d" stroke-opacity="0.55" stroke-width="1.4" stroke-linejoin="round"/>
+</g>
+</g>
+<polygon points="180.0,81.8 222.0,106.0 180.0,130.2 138.0,106.0" fill="#082897" stroke="#082897" stroke-opacity="1" stroke-width="1.2" stroke-linejoin="round"/>
+<polygon points="190.0,97.2 195.2,100.2 170.0,114.8 164.8,111.8" fill="#ffffff"/>
+<polygon points="170.0,97.2 195.2,111.8 190.0,114.8 164.8,100.2" fill="#ffffff"/>
+</svg>

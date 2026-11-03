@@ -1,0 +1,58 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Mozilla+Headline:wght@200..700&display=swap");
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --color-bay-50: #e6f2ff;
+    --color-bay-100: #d2e8ff;
+    --color-bay-200: #aed3ff;
+    --color-bay-300: #7eb6ff;
+    --color-bay-400: #4c8bff;
+    --color-bay-500: #2361ff;
+    --color-bay-600: #0034ff;
+    --color-bay-700: #0a2fd9;
+    --color-bay-800: #0b2bb0;
+    --color-bay-900: #082897;
+    --color-bay-950: #051761;
+
+    --font-heading:
+        "Mozilla Headline", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, sans-serif;
+
+    --font-sans:
+        "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+
+    --font-mono:
+        "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply bg-neutral-50 text-neutral-900 antialiased font-sans selection:bg-bay-500/20 selection:text-bay-600;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-heading;
+    }
+
+    h1,
+    h2,
+    h3 {
+        text-wrap: balance;
+    }
+
+    p {
+        text-wrap: pretty;
+    }
+}

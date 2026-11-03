@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="800" viewBox="0 0 400 800" fill="none">
+<defs>
+<linearGradient id="gSoft" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#d2e8ff" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#4c8bff" stop-opacity="0.55"/>
+</linearGradient>
+<linearGradient id="gCyl" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#d2e8ff" stop-opacity="0.95"/>
+<stop offset="0.55" stop-color="#aed3ff" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#7eb6ff" stop-opacity="0.85"/>
+</linearGradient>
+<linearGradient id="gPie" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#7eb6ff"/>
+<stop offset="1" stop-color="#2361ff"/>
+</linearGradient>
+<radialGradient id="gFade" cx="320" cy="560" r="700" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#fff" stop-opacity="1"/>
+<stop offset="0.55" stop-color="#fff" stop-opacity="0.6"/>
+<stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</radialGradient>
+<mask id="mFade" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="800">
+<rect width="400" height="800" fill="url(#gFade)"/>
+</mask>
+<filter id="grain" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+<feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.0 0 0 0 -0.43" result="dk"/>
+<feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -1.0 0 0 0 0.64" result="lt"/>
+<feComposite in="dk" in2="SourceAlpha" operator="in" result="dkc"/>
+<feComposite in="lt" in2="SourceAlpha" operator="in" result="ltc"/>
+<feMerge>
+<feMergeNode in="SourceGraphic"/>
+<feMergeNode in="dkc"/>
+<feMergeNode in="ltc"/>
+</feMerge>
+</filter>
+<filter id="soft" filterUnits="userSpaceOnUse" x="-24" y="-24" width="448" height="848"><feGaussianBlur stdDeviation="1.3"/></filter>
+</defs>
+<g filter="url(#soft)" opacity="0.78">
+<g mask="url(#mFade)"><g stroke="#7eb6ff" stroke-opacity="0.38" stroke-width="1"><line x1="0" y1="-230.9" x2="400" y2="0.0"/><line x1="0" y1="-178.9" x2="400" y2="52.0"/><line x1="0" y1="-126.9" x2="400" y2="104.0"/><line x1="0" y1="-74.9" x2="400" y2="156.0"/><line x1="0" y1="-22.9" x2="400" y2="208.0"/><line x1="0" y1="29.1" x2="400" y2="260.0"/><line x1="0" y1="81.1" x2="400" y2="312.0"/><line x1="0" y1="133.1" x2="400" y2="364.0"/><line x1="0" y1="185.1" x2="400" y2="416.0"/><line x1="0" y1="237.1" x2="400" y2="468.0"/><line x1="0" y1="289.1" x2="400" y2="520.0"/><line x1="0" y1="341.1" x2="400" y2="572.0"/><line x1="0" y1="393.1" x2="400" y2="624.0"/><line x1="0" y1="445.1" x2="400" y2="676.0"/><line x1="0" y1="497.1" x2="400" y2="728.0"/><line x1="0" y1="549.1" x2="400" y2="780.0"/><line x1="0" y1="601.1" x2="400" y2="832.0"/><line x1="0" y1="653.1" x2="400" y2="884.0"/><line x1="0" y1="705.1" x2="400" y2="936.0"/><line x1="0" y1="757.1" x2="400" y2="988.0"/><line x1="0" y1="0.0" x2="400" y2="-230.9"/><line x1="0" y1="52.0" x2="400" y2="-178.9"/><line x1="0" y1="104.0" x2="400" y2="-126.9"/><line x1="0" y1="156.0" x2="400" y2="-74.9"/><line x1="0" y1="208.0" x2="400" y2="-22.9"/><line x1="0" y1="260.0" x2="400" y2="29.1"/><line x1="0" y1="312.0" x2="400" y2="81.1"/><line x1="0" y1="364.0" x2="400" y2="133.1"/><line x1="0" y1="416.0" x2="400" y2="185.1"/><line x1="0" y1="468.0" x2="400" y2="237.1"/><line x1="0" y1="520.0" x2="400" y2="289.1"/><line x1="0" y1="572.0" x2="400" y2="341.1"/><line x1="0" y1="624.0" x2="400" y2="393.1"/><line x1="0" y1="676.0" x2="400" y2="445.1"/><line x1="0" y1="728.0" x2="400" y2="497.1"/><line x1="0" y1="780.0" x2="400" y2="549.1"/><line x1="0" y1="832.0" x2="400" y2="601.1"/><line x1="0" y1="884.0" x2="400" y2="653.1"/><line x1="0" y1="936.0" x2="400" y2="705.1"/><line x1="0" y1="988.0" x2="400" y2="757.1"/></g></g>
+<g opacity="0.5">
+<polygon points="385.0,8.2 440.0,40.0 385.0,71.8 330.0,40.0" fill="#ffffff" fill-opacity="0.72" stroke="#0b1b4d" stroke-opacity="0.55" stroke-width="1.4" stroke-linejoin="round"/>
+</g>
+<g opacity="0.4">
+<polygon points="20.0,224.0 65.0,250.0 20.0,276.0 -25.0,250.0" fill="#ffffff" fill-opacity="0.72" stroke="#0b1b4d" stroke-opacity="0.55" stroke-width="1.4" stroke-linejoin="round"/>
+</g>
+<g opacity="0.55">
+<polygon points="392.0,411.1 442.0,440.0 392.0,468.9 342.0,440.0" fill="#ffffff" fill-opacity="0.72" stroke="#0b1b4d" stroke-opacity="0.55" stroke-width="1.4" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>
