@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { ShieldCheck, Zap, Lock, QrCode, HardDriveDownload, EyeOff } from "lucide-react";
 
 const features = [
@@ -38,8 +39,14 @@ const SecurityFeatures = () => {
         <section id="features" className="bg-neutral-50 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
             <div className="mx-auto max-w-7xl">
                 
-                {/* Header */}
-                <div className="mx-auto max-w-3xl text-center">
+                 
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="mx-auto max-w-3xl text-center"
+                >
                     <p className="font-mono text-xs font-semibold uppercase tracking-widest text-bay-600">
                         Privacy First Architecture
                     </p>
@@ -49,19 +56,24 @@ const SecurityFeatures = () => {
                     <p className="mt-4 text-base text-neutral-600 sm:text-lg">
                         AirClip cuts out middleman servers completely, giving you direct device-to-device transfers with zero compromises.
                     </p>
-                </div>
+                </motion.div>
 
-                {/* Features Grid */}
+                
                 <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                     {features.map((feature, idx) => {
                         const IconComponent = feature.icon;
                         return (
-                            <div
+                            <motion.div
                                 key={idx}
-                                className="group relative flex flex-col justify-between rounded-3xl bg-white p-8 border border-neutral-200/80 shadow-sm transition-all duration-300 hover:border-bay-300 hover:shadow-md hover:-translate-y-1"
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-50px" }}
+                                transition={{ duration: 0.5, delay: (idx % 3) * 0.1, ease: "easeOut" }}
+                                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                                className="group relative flex flex-col justify-between rounded-3xl bg-white p-8 border border-neutral-200/80 shadow-sm transition-colors duration-300 hover:border-bay-300 hover:shadow-xl"
                             >
                                 <div>
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-bay-50 text-bay-700 transition-colors group-hover:bg-bay-900 group-hover:text-white">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-bay-50 text-bay-700 transition-all duration-300 group-hover:bg-bay-900 group-hover:text-white group-hover:scale-110">
                                         <IconComponent className="h-6 w-6" />
                                     </div>
                                     <h3 className="mt-6 text-xl font-bold text-neutral-900">
@@ -71,7 +83,7 @@ const SecurityFeatures = () => {
                                         {feature.description}
                                     </p>
                                 </div>
-                            </div>
+                            </motion.div>
                         );
                     })}
                 </div>

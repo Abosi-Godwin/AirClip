@@ -1,4 +1,4 @@
- import { create } from "zustand";
+import { create } from "zustand";
 import Peer, { DataConnection } from "peerjs";
 
 export interface TransferFile {
@@ -36,6 +36,10 @@ const STUN_SERVERS: RTCIceServer[] = [
 
 const TURN_SERVERS: RTCIceServer[] = [];
 
+const ICE_ENDPOINT = "/api/turn";
+const ICE_TIMEOUT_MS = 5000;
+const ICE_TTL_MS = 300000;
+
 const HOST_REGISTER_RETRY_MS = 700;
 const HOST_RETRY_MS = 1500;
 const GUEST_RETRIES = 3;
@@ -44,6 +48,7 @@ const SERVER_SLOW_MS = 8000;
 const SERVER_TIMEOUT_MS = 25000;
 const OPEN_TIMEOUT_MS = 25000;
 const GIVE_UP_MS = 90000;
+const ROUTE_CHECK_MS = 600;
 const LOG_LIMIT = 40;
 
 const TRANSIENT_ERRORS = ["network", "server-error", "socket-error", "socket-closed"];
@@ -52,17 +57,16 @@ const MSG_SERVER = "Can't reach the connection server. Check your internet conne
 const MSG_UNREACHABLE = "Could not reach the other device. Check that both devices are online, or try again.";
 const MSG_DIRECT_LINK =
     "The two devices found each other but could not open a direct connection. One of the networks probably blocks peer-to-peer traffic, which usually needs a TURN relay server.";
+const MSG_DIRECT_LINK_RELAY =
+    "The two devices found each other but could not connect, even through the relay server. Check that both devices are online and try again.";
 const MSG_HOST_DIRECT_LINK =
     "A device tried to join, but the direct connection was never set up. If this keeps happening, one of the networks probably blocks peer-to-peer traffic, which needs a TURN relay server.";
+const MSG_HOST_DIRECT_LINK_RELAY =
+    "A device tried to join, but the connection could not be set up, even through the relay server. Waiting for it to try again.";
 const MSG_FULL = "This room already has two devices connected.";
 
 const hostIdOf = (room: string) => `airclip-room-${room}-host`;
 const guestIdOf = (room: string) => `airclip-room-${room}-guest`;
-
-const peerOptions = () =>
-    TURN_SERVERS.length
-        ? { config: { iceServers: [...STUN_SERVERS, ...TURN_SERVERS] } }
-        : {};
 
 let session = 0;
 let activeRoom = "";
@@ -70,6 +74,15 @@ let currentPeer: Peer | null = null;
 let timers: ReturnType<typeof setTimeout>[] = [];
 let deadline = 0;
 let startedAt = 0;
+let relayServers: RTCIceServer[] = [];
+let relayFetchedAt = 0;
+
+const hasRelay = () => relayServers.length > 0 || TURN_SERVERS.length > 0;
+
+const peerOptions = () => {
+    const extra = [...TURN_SERVERS, ...relayServers];
+    return extra.length ? { config: { iceServers: [...STUN_SERVERS, ...extra] } } : {};
+};
 
 export const useRoomStore = create<RoomState>((set, get) => {
     function later(ms: number, token: number, fn: () => void) {
@@ -119,6 +132,74 @@ export const useRoomStore = create<RoomState>((set, get) => {
             connectionError: message,
             connectionDetail: "",
         });
+    }
+
+    async function loadRelay(token: number) {
+        if (relayFetchedAt && Date.now() - relayFetchedAt < ICE_TTL_MS) return;
+
+        step(token, "Preparing a secure route...");
+
+        const controller = new AbortController();
+        let timer: ReturnType<typeof setTimeout> | undefined;
+
+        try {
+            const request = fetch(ICE_ENDPOINT, { signal: controller.signal }).then(async (res) => {
+                if (!res.ok) throw new Error(`status ${res.status}`);
+                return res.json();
+            });
+            const timeout = new Promise<never>((_, reject) => {
+                timer = setTimeout(() => {
+                    controller.abort();
+                    reject(new Error("timed out"));
+                }, ICE_TIMEOUT_MS);
+            });
+
+            const data: any = await Promise.race([request, timeout]);
+            const list = Array.isArray(data) ? data : data?.iceServers;
+            relayServers = Array.isArray(list) ? list.filter((s: any) => s && s.urls) : [];
+            relayFetchedAt = Date.now();
+            note(token, relayServers.length ? "Relay servers ready" : "No relay servers returned");
+        } catch (err: any) {
+            note(token, `Relay unavailable (${err?.message || "error"}). Using direct connections only`);
+        } finally {
+            if (timer) clearTimeout(timer);
+        }
+    }
+
+    async function noteRoute(conn: DataConnection, token: number) {
+        const pc = (conn as any).peerConnection as RTCPeerConnection | undefined;
+        if (!pc || typeof pc.getStats !== "function") return;
+
+        try {
+            const stats = await pc.getStats();
+            let pairId = "";
+            stats.forEach((report: any) => {
+                if (report.type === "transport" && report.selectedCandidatePairId) {
+                    pairId = report.selectedCandidatePairId;
+                }
+            });
+
+            let pair: any = pairId ? stats.get(pairId) : undefined;
+            if (!pair) {
+                stats.forEach((report: any) => {
+                    if (report.type === "candidate-pair" && (report.selected || (report.nominated && report.state === "succeeded"))) {
+                        pair = report;
+                    }
+                });
+            }
+            if (!pair) return;
+
+            const local: any = stats.get(pair.localCandidateId);
+            const remote: any = stats.get(pair.remoteCandidateId);
+            const relayed = local?.candidateType === "relay" || remote?.candidateType === "relay";
+            const rtt =
+                typeof pair.currentRoundTripTime === "number"
+                    ? `, ${Math.round(pair.currentRoundTripTime * 1000)} ms`
+                    : "";
+            note(token, relayed ? `Route: relayed through TURN${rtt}` : `Route: direct${rtt}`);
+        } catch (err) {
+            return;
+        }
     }
 
     function retryHost(room: string, token: number, message: string) {
@@ -247,13 +328,16 @@ export const useRoomStore = create<RoomState>((set, get) => {
                 setupConnectionListeners(conn, set, get, () =>
                     onConnectionClosed(room, token, "host")
                 );
+                later(ROUTE_CHECK_MS, token, () => noteRoute(conn, token));
             };
 
             const abandon = () => {
                 if (settled || !live()) return;
                 settled = true;
                 conn.close();
-                if (!get().connection) step(token, MSG_HOST_DIRECT_LINK);
+                if (!get().connection) {
+                    step(token, hasRelay() ? MSG_HOST_DIRECT_LINK_RELAY : MSG_HOST_DIRECT_LINK);
+                }
             };
 
             watchIce(conn, token, abandon);
@@ -317,8 +401,11 @@ export const useRoomStore = create<RoomState>((set, get) => {
             const giveUp = () => {
                 if (opened || !live()) return;
                 const pc = (conn as any).peerConnection as RTCPeerConnection | undefined;
-                if (pc && pc.remoteDescription) fail(token, MSG_DIRECT_LINK);
-                else retryHost(room, token, MSG_UNREACHABLE);
+                if (pc && pc.remoteDescription) {
+                    fail(token, hasRelay() ? MSG_DIRECT_LINK_RELAY : MSG_DIRECT_LINK);
+                } else {
+                    retryHost(room, token, MSG_UNREACHABLE);
+                }
             };
 
             watchIce(conn, token, giveUp);
@@ -338,6 +425,7 @@ export const useRoomStore = create<RoomState>((set, get) => {
                 setupConnectionListeners(conn, set, get, () =>
                     onConnectionClosed(room, token, "guest")
                 );
+                later(ROUTE_CHECK_MS, token, () => noteRoute(conn, token));
             });
 
             conn.on("error", giveUp);
@@ -410,7 +498,11 @@ export const useRoomStore = create<RoomState>((set, get) => {
             });
 
             note(token, `Opening room ${room}`);
-            later(0, token, () => runHost(room, token, 0));
+            later(0, token, () => {
+                loadRelay(token).then(() => {
+                    if (token === session) runHost(room, token, 0);
+                });
+            });
         },
 
         sendText: (text: string) => {
