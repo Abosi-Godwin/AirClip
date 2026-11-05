@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
     Radio,
-    Copy,
     Check,
     Send,
     FileUp,
@@ -11,11 +10,30 @@ import {
     ShieldCheck,
     Users,
     ArrowLeft,
-    FileText
+    FileText,
+    QrCode
 } from "lucide-react";
 import { useRoomStore, TransferFile } from "../store/useRoomStore";
 import Button from "../components/ui/Button";
 import ConnectionBanner from "../components/ui/ConnectionBanner";
+import ShareModal from "../components/ui/ShareModal";
+
+const readRoute = (log: string[]) => {
+    for (let i = log.length - 1; i >= 0; i--) {
+        const match = log[i].match(
+            /Route: (direct|relayed through TURN)(?:, (\d+) ms)?/
+        );
+
+        if (match) {
+            return {
+                relayed: match[1] !== "direct",
+                rtt: match[2] ? Number(match[2]) : null
+            };
+        }
+    }
+
+    return null;
+};
 
 export const Room = () => {
     const { roomId } = useParams<{ roomId: string }>();
@@ -37,11 +55,29 @@ export const Room = () => {
     } = useRoomStore();
 
     const [textInput, setTextInput] = useState("");
-    const [copiedLink, setCopiedLink] = useState(false);
+    const [shareOpen, setShareOpen] = useState(false);
     const [copiedText, setCopiedText] = useState(false);
     const [dragActive, setDragActive] = useState(false);
 
     const failed = connectionStatus === "disconnected" && !!connectionError;
+    const route = connectionStatus === "connected" ? readRoute(connectionLog) : null;
+
+    const status =
+        connectionStatus === "connected"
+            ? { label: "Connected", text: "text-emerald-700", dot: "bg-emerald-500" }
+            : failed
+              ? { label: "Failed", text: "text-red-700", dot: "bg-red-500" }
+              : {
+                    label: "Waiting...",
+                    text: "text-amber-700",
+                    dot: "bg-amber-500 animate-ping"
+                };
+
+    const routeText = route
+        ? [route.relayed ? "Relayed" : "Direct", route.rtt !== null ? `${route.rtt} ms` : null]
+              .filter(Boolean)
+              .join(" · ")
+        : null;
 
     useEffect(() => {
         if (!roomId) return;
@@ -66,13 +102,6 @@ export const Room = () => {
 
     const handleRetry = () => {
         if (roomId) initializePeer(roomId);
-    };
-
-    const handleCopyRoomLink = () => {
-        const roomUrl = window.location.href;
-        navigator.clipboard.writeText(roomUrl);
-        setCopiedLink(true);
-        setTimeout(() => setCopiedLink(false), 2000);
     };
 
     const handleCopyClipboardText = () => {
@@ -108,75 +137,69 @@ export const Room = () => {
     return (
         <div className="min-h-screen bg-neutral-50 flex flex-col">
             <header className="sticky top-0 z-40 border-b border-neutral-200/80 bg-white/80 backdrop-blur-md">
-                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-3">
+                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+                    <div className="flex min-w-0 items-center gap-3">
                         <button
                             onClick={() => {
                                 disconnectRoom();
                                 navigate("/");
                             }}
-                            className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-100 transition-colors"
+                            className="shrink-0 rounded-lg p-2 text-neutral-600 hover:bg-neutral-100 transition-colors"
                             title="Leave Room"
                         >
                             <ArrowLeft className="h-5 w-5" />
                         </button>
-                        <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-bay-900 text-white">
+
+                        <div className="flex min-w-0 items-center gap-2.5">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-bay-900 text-white">
                                 <Radio className="h-4 w-4 text-bay-300 animate-pulse" />
                             </div>
-                            <span className="font-bold text-neutral-900 tracking-tight">
-                                Room{" "}
-                                <span className="font-mono text-bay-600">
-                                    #{roomId}
-                                </span>
-                            </span>
+
+                            <div className="min-w-0 leading-tight">
+                                <p className="truncate font-bold tracking-tight text-neutral-900">
+                                    Room{" "}
+                                    <span className="font-mono text-bay-600">
+                                        #{roomId}
+                                    </span>
+                                </p>
+                                <p
+                                    title={
+                                        route
+                                            ? route.relayed
+                                                ? "A direct path was not possible, so traffic goes through an encrypted relay. Measured when the connection opened."
+                                                : "Your devices are connected straight to each other. Measured when the connection opened."
+                                            : undefined
+                                    }
+                                    className="mt-1 flex min-w-0 items-center gap-1.5 text-xs"
+                                >
+                                    <span
+                                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${status.dot}`}
+                                    />
+                                    <span
+                                        className={`shrink-0 font-medium ${status.text}`}
+                                    >
+                                        {status.label}
+                                    </span>
+                                    {routeText && (
+                                        <span className="truncate text-neutral-500">
+                                            &middot; {routeText}
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 sm:gap-3">
-                        <div
-                            className={`flex items-center gap-1.5 sm:gap-2 rounded-full px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-medium border ${
-                                connectionStatus === "connected"
-                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                    : failed
-                                      ? "bg-red-50 text-red-700 border-red-200"
-                                      : "bg-amber-50 text-amber-700 border-amber-200"
-                            }`}
-                        >
-                            <span
-                                className={`h-2 w-2 rounded-full ${
-                                    connectionStatus === "connected"
-                                        ? "bg-emerald-500"
-                                        : failed
-                                          ? "bg-red-500"
-                                          : "bg-amber-500 animate-ping"
-                                }`}
-                            />
-                            <span className="font-mono uppercase tracking-wider">
-                                {connectionStatus === "connected"
-                                    ? "Connected"
-                                    : failed
-                                      ? "Failed"
-                                      : "Waiting..."}
-                            </span>
-                        </div>
-
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleCopyRoomLink}
-                            className="flex items-center gap-1.5 font-medium text-xs sm:text-sm px-2.5 sm:px-3"
-                        >
-                            {copiedLink ? (
-                                <Check className="h-4 w-4 text-emerald-600" />
-                            ) : (
-                                <Copy className="h-4 w-4" />
-                            )}
-                            <span className="hidden xs:inline">
-                                {copiedLink ? "Copied" : "Share"}
-                            </span>
-                        </Button>
-                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShareOpen(true)}
+                        aria-label="Share room"
+                        className="flex shrink-0 items-center gap-1.5 font-medium text-xs sm:text-sm px-2.5 sm:px-3"
+                    >
+                        <QrCode className="h-4 w-4" />
+                        <span className="hidden xs:inline">Share</span>
+                    </Button>
                 </div>
             </header>
 
@@ -269,8 +292,9 @@ export const Room = () => {
                             </label>
                         </p>
                         <p className="mt-1 text-xs text-neutral-500">
-                            Transfers directly peer-to-peer over WebRTC data
-                            channels
+                            {route?.relayed
+                                ? "Sent through an encrypted relay because a direct link was not possible"
+                                : "Transfers directly peer-to-peer over WebRTC data channels"}
                         </p>
                     </div>
 
@@ -320,6 +344,15 @@ export const Room = () => {
                                                 <Download className="h-3.5 w-3.5" />
                                                 <span>Save</span>
                                             </a>
+                                        ) : file.status === "completed" ? (
+                                            <div className="flex items-center gap-1.5 text-xs font-mono text-emerald-600">
+                                                <Check className="h-4 w-4" />
+                                                <span>Sent</span>
+                                            </div>
+                                        ) : file.status === "error" ? (
+                                            <div className="text-xs font-mono text-red-600">
+                                                Failed
+                                            </div>
                                         ) : (
                                             <div className="flex items-center gap-1.5 text-xs font-mono text-bay-600">
                                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -333,6 +366,14 @@ export const Room = () => {
                     </div>
                 </div>
             </main>
+
+            {shareOpen && roomId && (
+                <ShareModal
+                    url={window.location.href}
+                    roomId={roomId}
+                    onClose={() => setShareOpen(false)}
+                />
+            )}
         </div>
     );
 };
